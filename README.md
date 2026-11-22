@@ -22,7 +22,7 @@ Lean formally proves:
 Install [elan / Lean 4](https://lean-lang.org/install/) and Node.js 22+:
 
 ```sh
-lake env lean LeanExperiments.lean
+lean LeanExperiments.lean
 node --test
 ```
 

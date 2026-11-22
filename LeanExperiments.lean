@@ -32,11 +32,3 @@ theorem execute_preserves_active :
     transition .active .execute = some .active := by
   rfl
 
--- An abstract serialized schedule: two close requests commute.
-theorem concurrent_closes_serialized :
-    (transition .active .close).bind (fun s => transition s .close) =
-      (transition .active .close).bind (fun s => transition s .close) := by
-  rfl
-
--- The theorem above is intentionally only a sequential model;
--- it does not establish atomicity of a real concurrent implementation.

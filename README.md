@@ -23,6 +23,7 @@ Install [elan / Lean 4](https://lean-lang.org/install/) and Node.js 22+:
 
 ```sh
 lean LeanExperiments.lean
+lean Concurrency.lean
 node --test
 ```
 

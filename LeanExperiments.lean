@@ -8,6 +8,7 @@ inductive Command where
   | close
   deriving DecidableEq, Repr
 
+-- An accepted request yields the next state; none means rejection.
 def transition (state : SessionState) (command : Command) : Option SessionState :=
   match state, command with
   | .active, .execute => some .active
@@ -32,3 +33,31 @@ theorem execute_preserves_active :
     transition .active .execute = some .active := by
   rfl
 
+-- A schedule is a total order of atomic requests (a linearization).
+-- A rejected execute leaves the state unchanged.
+def advance (state : SessionState) (command : Command) : SessionState :=
+  match command with
+  | .execute => state
+  | .close => .closed
+
+def run (state : SessionState) : List Command → SessionState
+  | [] => state
+  | command :: tail => run (advance state command) tail
+
+-- The closed state is absorbing for *any* sequence of later requests.
+theorem closed_is_absorbing (schedule : List Command) :
+    run .closed schedule = .closed := by
+  induction schedule with
+  | nil => rfl
+  | cons command tail ih =>
+    cases command <;> simpa [run, advance] using ih
+
+-- After close, execute is rejected even if arbitrary other requests intervene.
+theorem no_execute_after_close (state : SessionState) (later : List Command) :
+    transition (run (advance state .close) later) .execute = none := by
+  simpa [advance, closed_is_absorbing] using closed_rejects_execute
+
+-- A close request is independent of the preceding sequence of requests.
+theorem close_from_any_state (state : SessionState) (later : List Command) :
+    run (advance state .close) later = .closed := by
+  simpa [advance] using closed_is_absorbing later
